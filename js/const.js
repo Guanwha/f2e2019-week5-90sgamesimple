@@ -1,2 +1,2 @@
-const cw = 1336;
+const cw = 1366;
 const ch = 768;
