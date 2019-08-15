@@ -4,7 +4,7 @@
 - https://xd.adobe.com/spec/867dd825-3841-42a1-5edf-85136dae2153-f04c/grid
 
 ## DEMO
- - [完成範例]()
+ - [完成範例](https://guanwha.github.io/f2e2019-week5-90sgamesimple/)
 
 ## 操作
  - 鍵盤的上左右控制方向
