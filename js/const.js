@@ -1,2 +1,2 @@
-const cw = 800;
-const ch = 450;
+const cw = 1336;
+const ch = 768;
