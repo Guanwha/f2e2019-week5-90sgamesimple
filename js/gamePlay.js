@@ -1,3 +1,7 @@
+const tweenMapEase = 'Power4';
+const tweenMapDuration = 2000;
+const tweenMapChangeTime1 = 88;
+const tweenMapChangeTime2 = 86;
 
 const gamePlay = {
     key: 'gamePlay',
@@ -25,12 +29,42 @@ const gamePlay = {
     },
     create: function(){
         // background & footer
-        this.map1Map = this.add.tileSprite(0, 0, cw, ch, 'map1_bg').setOrigin(0);
-        this.map2Map = this.add.tileSprite(0, 0, cw, ch, 'map2_bg').setOrigin(0).visible = false;
-        this.map3Map = this.add.tileSprite(0, 0, cw, ch, 'map3_bg').setOrigin(0).visible = false;
-        this.map1Rock = this.add.tileSprite(0, 768, cw, 215, 'map1_rock').setOrigin(0, 1);
-        this.map2Rock = this.add.tileSprite(0, 768, cw, 233, 'map2_rock').setOrigin(0, 1).visible = false;
-        this.map3Rock = this.add.tileSprite(0, 768, cw, 167, 'map3_rock').setOrigin(0, 1).visible = false;
+        this.map1Map = this.add.image(0, 0, 'map1_bg').setOrigin(0).setAlpha(1);
+        this.map2Map = this.add.image(0, 0, 'map2_bg').setOrigin(0).setAlpha(0);
+        this.map3Map = this.add.image(0, 0, 'map3_bg').setOrigin(0).setAlpha(0);
+        this.map1Rock = this.add.tileSprite(0, 768, cw, 215, 'map1_rock').setOrigin(0, 1).setAlpha(1);
+        this.map2Rock = this.add.tileSprite(0, 768, cw, 233, 'map2_rock').setOrigin(0, 1).setAlpha(0);
+        this.map3Rock = this.add.tileSprite(0, 768, cw, 167, 'map3_rock').setOrigin(0, 1).setAlpha(0);
+
+        // background & footer' tween
+        this.tweenMap1FadeOut = this.tweens.add({
+            targets: [this.map1Map, this.map1Rock],
+            alpha: 0,
+            easeOut: tweenMapEase,
+            duration: tweenMapDuration,
+            paused: true,
+        });
+        this.tweenMap2FadeIn = this.tweens.add({
+            targets: [this.map2Map, this.map2Rock],
+            alpha: 1,
+            easeIn: tweenMapEase,
+            duration: tweenMapDuration,
+            paused: true,
+        });
+        this.tweenMap2FadeOut = this.tweens.add({
+            targets: [this.map2Map, this.map2Rock],
+            alpha: 0,
+            easeOut: tweenMapEase,
+            duration: tweenMapDuration,
+            paused: true,
+        });
+        this.tweenMap3FadeIn = this.tweens.add({
+            targets: [this.map3Map, this.map3Rock],
+            alpha: 1,
+            easeIn: tweenMapEase,
+            duration: tweenMapDuration,
+            paused: true,
+        });
 
         // status
         this.add.image(50, 43.86, 'icon_turtle_life').setOrigin(0);
@@ -41,7 +75,7 @@ const gamePlay = {
             this.dialogHint.visible = true;
         });
         this.add.text(185, 56, this.gameLife, { color: '#707070', fontSize: '40px', fontStyle: 'bold', fontFamily: 'Roboto'});
-        this.add.text(1250, 55, getDecXX(this.gameTime, 2), { color: '#FFFFFF', fontSize: '40px', fontStyle: 'bold', fontFamily: 'Roboto'});
+        this.txtTime = this.add.text(1250, 55, getDecXX(this.gameTime, 2), { color: '#FFFFFF', fontSize: '40px', fontStyle: 'bold', fontFamily: 'Roboto'});
 
         // hint dialog
         this.bgHint = this.add.image(0, 0, 'bgHint').setOrigin(0);
@@ -51,6 +85,20 @@ const gamePlay = {
         });
         this.dialogHint = this.add.container(437, 54, [this.bgHint, this.btnClose]);
         this.dialogHint.visible = false;
+
+        // countdown
+        setInterval(() => {
+            this.gameTime--;
+            this.txtTime.setText(getDecXX(this.gameTime, 2));
+            if (this.gameTime === tweenMapChangeTime1) {
+                this.tweenMap1FadeOut.play();
+                this.tweenMap2FadeIn.play();
+            }
+            else if (this.gameTime === tweenMapChangeTime2) {
+                this.tweenMap2FadeOut.play();
+                this.tweenMap3FadeIn.play();
+            }
+        }, 1000);
     },
     update: function(){
         // background & footer movement
