@@ -1,0 +1,6 @@
+{
+  "editor.tabSize": 2,
+  "editor.fastScrollSensitivity": 3,
+  "editor.foldingStrategy": "indentation",
+  "html.format.indentInnerHtml": true
+}
