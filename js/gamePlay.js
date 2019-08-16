@@ -1,7 +1,11 @@
 const tweenMapEase = 'Power4';
 const tweenMapDuration = 2000;
-const tweenMapChangeTime1 = 88;     // [!!!]
-const tweenMapChangeTime2 = 86;     // [!!!]
+const tweenMapChangeTime1 = 60;     // [!!!]
+const tweenMapChangeTime2 = 30;     // [!!!]
+const playerMoveUpSpeed = 300;
+const playerMoveDownSpeed = 300;
+const playerMoveLeftSpeed = 200;
+const playerMoveRightSpeed = 200;
 
 const gamePlay = {
     key: 'gamePlay',
@@ -81,9 +85,26 @@ const gamePlay = {
         this.txtTime = this.add.text(1250, 55, getDecXX(this.gameTime, 2), { color: '#FFFFFF', fontSize: '40px', fontStyle: 'bold', fontFamily: 'Roboto'});
 
         // player
-        this.player = this.add.sprite(cw/2, ch/2, 'turtle').setOrigin(295/400, 180/400);    // set the anchor to the turtle's head
+        this.player = this.physics.add.sprite(cw/2, ch/2, 'turtle').setOrigin(295/400, 180/400);    // set the anchor to the turtle's head
         keyFrame(this);
         this.player.anims.play('swim', true);
+
+        // physics
+        this.player.setCollideWorldBounds(true);                    // limite the player action range
+        this.player.setCircle(30, 265, 150);                        // player's collider
+
+        //-- upper bound
+        this.upperBound = this.add.tileSprite(0, 0, cw, 103, 'map3_rock').setOrigin(0, 0).setVisible(false);
+        this.physics.add.existing(this.upperBound);
+        this.physics.add.collider(this.player, this.upperBound);
+        this.upperBound.body.immovable = true;
+        this.upperBound.body.moves = false;
+
+        //-- lower bound
+        this.physics.add.existing(this.map1Rock);
+        this.physics.add.collider(this.player, this.map1Rock);
+        this.map1Rock.body.immovable = true;
+        this.map1Rock.body.moves = false;
 
         // hint dialog
         this.bgHint = this.add.image(0, 0, 'bgHint').setOrigin(0);
@@ -93,6 +114,8 @@ const gamePlay = {
         });
         this.dialogHint = this.add.container(437, 54, [this.bgHint, this.btnClose]);
         this.dialogHint.visible = false;
+
+        // control
 
         // countdown
         setInterval(() => {
@@ -113,6 +136,22 @@ const gamePlay = {
         this.map1Rock.tilePositionX += 8;
         this.map2Rock.tilePositionX += 8;
         this.map3Rock.tilePositionX += 8;
+
+        // control
+        let keyboard = this.input.keyboard.createCursorKeys();
+        this.player.setVelocity(0);                                // clear x-direction velocity
+        if (keyboard.up.isDown) {
+            this.player.setVelocityY(-playerMoveUpSpeed);
+        }
+        else if (keyboard.down.isDown) {
+            this.player.setVelocityY(playerMoveDownSpeed);
+        }
+        if (keyboard.left.isDown) {
+            this.player.setVelocityX(-playerMoveLeftSpeed);
+        }
+        else if (keyboard.right.isDown) {
+            this.player.setVelocityX(playerMoveRightSpeed);
+        }
     },
 }
 
