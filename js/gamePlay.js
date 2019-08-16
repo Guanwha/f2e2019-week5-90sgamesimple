@@ -13,17 +13,25 @@ const cObjMap = [
     { category: 'enemy',  collider: {w: 103, h: 155}, key: 'enemy4', path: '../assets/enemy_fishing_net.png'},
     { category: 'healer', collider: {w: 55,  h: 72},  key: 'healer', path: '../assets/heal_jellyfish.png'},
 ];
-const cTotalGameTime = 90;                                  // total game time
-const cJellyTime = 60;                                      // time for jellyfish appealing
-const cFPS = 60;
-const cRockMoveSpeed = 8;                                   // pixels each frame (60 frames per second)
-const cJellyStartX = cRockMoveSpeed * cFPS * cJellyTime;    // position for jellyfish appealing
-const cObjMaxX = cRockMoveSpeed * cFPS * cTotalGameTime;    // obj limit range
+const cLevelTime = [30, 30, 30];                                                // duration each level
+const cTotalTime = cLevelTime[0] + cLevelTime[1] + cLevelTime[2];
+const cFPS = 60;                                                                // frames per second
+const cRockMoveSpeed = 8;                                                       // pixels each frame (60 frames per second) for footer
+const cObjMoveSpeed = [8, 8, 12];                                               // pixels each frame (60 frames per second) for enemy/healer
+const cLevelStartX = [
+    0,
+    (cObjMoveSpeed[0] * cLevelTime[0]) * cFPS,
+    (cObjMoveSpeed[0] * cLevelTime[0] + cObjMoveSpeed[1] * cLevelTime[1]) * cFPS,
+]
+const cJellyStartX = cLevelStartX[2]                                            // position for jellyfish appealing
+const cObjMaxX = (cObjMoveSpeed[0] * cLevelTime[0] +                            // obj limit range
+                  cObjMoveSpeed[1] * cLevelTime[1] +
+                  cObjMoveSpeed[2] * cLevelTime[2]) * cFPS;
 const cObjMinX = cw;
 const cObjMaxY = ch - 233;
 const cObjMinY = 103;
-const cMaxDistBetweenObjs = cw;                             // distance range between previous and next object
-const cMinDistBetweenObjs = 100;
+const cMaxDistBetweenObjs = [cw, cw/2, cw/2];               // distance range between previous and next object (level: 0, 1, 2)
+const cMinDistBetweenObjs = [100, 100, 100];
 
 
 const gamePlay = {
@@ -298,8 +306,10 @@ const gamePlay = {
         this.map3Rock.tilePositionX += cRockMoveSpeed;
 
         // enemy & healer movement
+        const lv = (cTotalTime - this.gameTime < cLevelTime[0]) ? 0 :
+                   (cTotalTime - this.gameTime < (cLevelTime[0] + cLevelTime[1]) ? 1 : 2);
         for (let i = 0; i<this.objs.length; i++) {
-            this.objs[i].sprite.setVelocityX(-cRockMoveSpeed * cFPS);
+            this.objs[i].sprite.setVelocityX(-cObjMoveSpeed[lv] * cFPS);
         }
 
         // control
@@ -347,22 +357,25 @@ const generateEnemyHealer = (self) => {
     let objIdx = 0;
     let i = 0;
     while (curX < cObjMaxX) {
+        // check level
+        const lv = (curX >= cLevelStartX[2]) ? 2 :
+                   (curX >= cLevelStartX[1]) ? 1 : 0;
+
         // random object
         objIdx = (curX >= cJellyStartX) ? random(4, 0) : random(3, 0);
         const objData = cObjMap[objIdx];
-        let sprite = self.physics.add.sprite(curX, curY, objData.key)
-        sprite.setSize(objData.collider.w, objData.collider.h);
-        sprite.category = objData.category;
-        sprite.objIdx = i;
+        let sprite = self.physics.add.sprite(curX, curY, objData.key);      // create sprite object
+        sprite.setSize(objData.collider.w, objData.collider.h);             // set collider
+        sprite.category = objData.category;                                 // set the category
+        sprite.objIdx = i;                                                  // which object in cObjMap[]
         let obj = { sprite, collider: null };
         self.objs.push(obj);
 
         // next position
         i++;
-        curX += random(cMaxDistBetweenObjs, cMinDistBetweenObjs);
+        curX += random(cMaxDistBetweenObjs[lv], cMinDistBetweenObjs[lv]);
         curY = random(cObjMaxY, cObjMinY);
     }
-    console.log(self.objs);
 }
 
 // random number from min to max
