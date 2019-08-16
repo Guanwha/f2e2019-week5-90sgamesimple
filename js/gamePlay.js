@@ -1,7 +1,7 @@
 const tweenMapEase = 'Power4';
 const tweenMapDuration = 2000;
-const tweenMapChangeTime1 = 88;
-const tweenMapChangeTime2 = 86;
+const tweenMapChangeTime1 = 88;     // [!!!]
+const tweenMapChangeTime2 = 86;     // [!!!]
 
 const gamePlay = {
     key: 'gamePlay',
@@ -22,6 +22,9 @@ const gamePlay = {
         // hint dialog
         this.load.image('bgHint', '../assets/hint.png');
         this.load.image('cross', '../assets/button_close.png');
+
+        // player
+        this.turtle = this.load.spritesheet('turtle', '../assets/turtlemove.png', { frameWidth: 400, frameHeight: 400});
 
         // data
         this.gameLife = 3;
@@ -76,6 +79,11 @@ const gamePlay = {
         });
         this.add.text(185, 56, this.gameLife, { color: '#707070', fontSize: '40px', fontStyle: 'bold', fontFamily: 'Roboto'});
         this.txtTime = this.add.text(1250, 55, getDecXX(this.gameTime, 2), { color: '#FFFFFF', fontSize: '40px', fontStyle: 'bold', fontFamily: 'Roboto'});
+
+        // player
+        this.player = this.add.sprite(cw/2, ch/2, 'turtle').setOrigin(295/400, 180/400);    // set the anchor to the turtle's head
+        keyFrame(this);
+        this.player.anims.play('swim', true);
 
         // hint dialog
         this.bgHint = this.add.image(0, 0, 'bgHint').setOrigin(0);
