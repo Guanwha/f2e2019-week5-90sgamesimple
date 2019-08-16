@@ -70,6 +70,7 @@ const gamePlay = {
         this.mouseDown = false;
         this.objs = [];             // {} include sprite, collider
         this.isPause = false;
+        this.isHurt = false;
     },
     create: function(){
         // background & footer
@@ -138,17 +139,26 @@ const gamePlay = {
         //-- enemy & healer
         for (let i=0; i<this.objs.length; i++) {
             this.objs[i].collider = this.physics.add.collider(this.player, this.objs[i].sprite, (obj1, obj2) => {
-                // life +/-
+                // player collide with enemy or healer
                 this.gameLife = (obj2.name === 'enemy') ? this.gameLife - 1
                              : ((obj2.name === 'healer') ? this.gameLife + 1 : this.gameLife);
                 this.gameLife = (this.gameLife > 5) ? 5 : this.gameLife;                            // max-life is 5
                 this.txtLife.setText(this.gameLife);
-                if (this.gameLife <= 0) {
-                    // game over
-                    this.isEnd = true;
-                    this.dialogGameOver.visible = true;
-                    clearInterval(this.countdownLoop);
-                    console.log('game over');
+                if (obj2.name === 'enemy') {
+                    if (this.gameLife <= 0) {
+                        // game over
+                        this.player.anims.play('dead', true);   // play dead animation
+                        this.isEnd = true;
+                        this.dialogGameOver.visible = true;
+                        clearInterval(this.countdownLoop);
+                        console.log('game over');
+                    }
+                    else {
+                        this.player.anims.play('hurt', true);   // play hurt animation
+                        this.player.anims.nextAnim = 'swim';
+                        this.isHurt = true;
+                        setTimeout(() => { this.isHurt = false; }, cHurtDuration);
+                    }
                 }
 
                 // when player collide with object, destory the object
@@ -311,11 +321,14 @@ const gamePlay = {
                 this.player.setVelocityX(playerMoveRightSpeed);
                 isSpeed = true;
             }
-            if (isSpeed) {
-                this.player.anims.play('speed', true);
-            }
-            else {
-                this.player.anims.play('swim', true);
+            // change the animation when hurt animation isn't doing
+            if (!this.isHurt) {
+                if (isSpeed) {
+                    this.player.anims.play('speed', true);
+                }
+                else {
+                    this.player.anims.play('swim', true);
+                }
             }
         }
     },

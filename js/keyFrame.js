@@ -15,7 +15,7 @@ const keyFrame = (self) => {
   self.anims.create({
     key: 'hurt',
     frames: self.anims.generateFrameNumbers('turtle', { start: 4, end: 4 }),
-    frameRate: 1,
+    duration: cHurtDuration,
     repeat: 0
   });
   self.anims.create({
