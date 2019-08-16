@@ -248,6 +248,7 @@ const gamePlay = {
 
         // countdown
         this.countdownLoop = setInterval(() => {
+            if (this.isPause) return;
             this.gameTime--;
             this.txtTime.setText(getDecXX(this.gameTime, 2));
             if (this.gameTime === tweenMapChangeTime1) {
