@@ -7,11 +7,11 @@ const playerMoveDownSpeed = 300;
 const playerMoveLeftSpeed = 200;
 const playerMoveRightSpeed = 200;
 const cObjMap = [
-    { type: 'enemy',  collider: {w: 41,  h: 43},  name: 'enemy1', path: '../assets/enemy_aluminum_can.png'},
-    { type: 'enemy',  collider: {w: 91,  h: 91},  name: 'enemy2', path: '../assets/enemy_bag.png'},
-    { type: 'enemy',  collider: {w: 76,  h: 37},  name: 'enemy3', path: '../assets/enemy_baote.png'},
-    { type: 'enemy',  collider: {w: 103, h: 155}, name: 'enemy4', path: '../assets/enemy_fishing_net.png'},
-    { type: 'healer', collider: {w: 55,  h: 72},  name: 'healer', path: '../assets/heal_jellyfish.png'},
+    { category: 'enemy',  collider: {w: 41,  h: 43},  key: 'enemy1', path: '../assets/enemy_aluminum_can.png'},
+    { category: 'enemy',  collider: {w: 91,  h: 91},  key: 'enemy2', path: '../assets/enemy_bag.png'},
+    { category: 'enemy',  collider: {w: 76,  h: 37},  key: 'enemy3', path: '../assets/enemy_baote.png'},
+    { category: 'enemy',  collider: {w: 103, h: 155}, key: 'enemy4', path: '../assets/enemy_fishing_net.png'},
+    { category: 'healer', collider: {w: 55,  h: 72},  key: 'healer', path: '../assets/heal_jellyfish.png'},
 ];
 const cTotalGameTime = 90;                                  // total game time
 const cJellyTime = 60;                                      // time for jellyfish appealing
@@ -53,7 +53,7 @@ const gamePlay = {
 
         // enemy & healer
         for (let i = 0; i < cObjMap.length; i++) {
-            this.load.image(cObjMap[i].name, cObjMap[i].path);
+            this.load.image(cObjMap[i].key, cObjMap[i].path);
         }
 
         // player
@@ -128,7 +128,7 @@ const gamePlay = {
 
         // player
         this.player = this.physics.add.sprite(cw/2, ch/2, 'turtle').setOrigin(295/400, 180/400);    // set the anchor to the turtle's head
-        this.player.name = 'player';
+        this.player.category = 'player';
         keyFrame(this);
         this.player.anims.play('swim', true);
 
@@ -140,11 +140,11 @@ const gamePlay = {
         for (let i=0; i<this.objs.length; i++) {
             this.objs[i].collider = this.physics.add.collider(this.player, this.objs[i].sprite, (obj1, obj2) => {
                 // player collide with enemy or healer
-                this.gameLife = (obj2.name === 'enemy') ? this.gameLife - 1
-                             : ((obj2.name === 'healer') ? this.gameLife + 1 : this.gameLife);
+                this.gameLife = (obj2.category === 'enemy') ? this.gameLife - 1
+                             : ((obj2.category === 'healer') ? this.gameLife + 1 : this.gameLife);
                 this.gameLife = (this.gameLife > 5) ? 5 : this.gameLife;                            // max-life is 5
                 this.txtLife.setText(this.gameLife);
-                if (obj2.name === 'enemy') {
+                if (obj2.category === 'enemy') {
                     if (this.gameLife <= 0) {
                         // game over
                         this.player.anims.play('dead', true);   // play dead animation
@@ -350,9 +350,9 @@ const generateEnemyHealer = (self) => {
         // random object
         objIdx = (curX >= cJellyStartX) ? random(4, 0) : random(3, 0);
         const objData = cObjMap[objIdx];
-        let sprite = self.physics.add.sprite(curX, curY, objData.name)
+        let sprite = self.physics.add.sprite(curX, curY, objData.key)
         sprite.setSize(objData.collider.w, objData.collider.h);
-        sprite.name = objData.type;
+        sprite.category = objData.category;
         sprite.objIdx = i;
         let obj = { sprite, collider: null };
         self.objs.push(obj);
