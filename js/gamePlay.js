@@ -46,6 +46,11 @@ const gamePlay = {
         this.load.image('bgHint', '../assets/hint.png');
         this.load.image('cross', '../assets/button_close.png');
 
+        // gameover dialog
+        this.load.image('bg_game_over', '../assets/gameover_1.png');
+        this.load.image('bg_game_success', '../assets/gameover_2.png');
+        this.load.image('btn_restart', '../assets/button_playagain.png');
+
         // enemy & healer
         for (let i = 0; i < cObjMap.length; i++) {
             this.load.image(cObjMap[i].name, cObjMap[i].path);
@@ -139,6 +144,8 @@ const gamePlay = {
                 if (this.gameLife <= 0) {
                     // game over
                     this.isEnd = true;
+                    this.dialogGameOver.visible = true;
+                    clearInterval(this.countdownLoop);
                     console.log('game over');
                 }
 
@@ -169,6 +176,24 @@ const gamePlay = {
         });
         this.dialogHint = this.add.container(437, 54, [this.bgHint, this.btnClose]);
         this.dialogHint.visible = false;
+
+        // game over dialog
+        this.bgGameOver = this.add.image(0, 0, 'bg_game_over').setOrigin(0);
+        this.btnRestart = this.add.image(218, 247, 'btn_restart').setOrigin(0).setInteractive();
+        this.dialogGameOver = this.add.container(392, 220, [this.bgGameOver, this.btnRestart]).setVisible(false);
+        this.btnRestart.on('pointerup', () => {
+            this.dialogGameOver.visible = false;
+            this.scene.start('gameStart');          // back to the gameStart
+        });
+
+        // game success dialog
+        this.bgGameSuccess = this.add.image(0, 0, 'bg_game_success').setOrigin(0);
+        this.btnRestart = this.add.image(218, 247, 'btn_restart').setOrigin(0).setInteractive();
+        this.dialogGameSuccess = this.add.container(392, 220, [this.bgGameSuccess, this.btnRestart]).setVisible(false);
+        this.btnRestart.on('pointerup', () => {
+            this.dialogGameSuccess.visible = false;
+            this.scene.start('gameStart');          // back to the gameStart
+        });
 
         // control
         this.down_center = this.add.image(0, 0, 'icon_mouse_drag').setAlpha(0.5).setVisible(false);
@@ -225,6 +250,7 @@ const gamePlay = {
             if (this.gameTime === 0) {
                 // game success
                 this.isEnd = true;
+                this.dialogGameSuccess.visible = true;
                 clearInterval(this.countdownLoop);
             }
         }, 1000);
