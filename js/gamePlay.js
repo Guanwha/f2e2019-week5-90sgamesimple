@@ -136,8 +136,9 @@ const gamePlay = {
                              : ((obj2.name === 'healer') ? this.gameLife + 1 : this.gameLife);
                 this.gameLife = (this.gameLife > 5) ? 5 : this.gameLife;                            // max-life is 5
                 this.txtLife.setText(this.gameLife);
-                if (this.gameLife < 0) {
-                    // [TODO] game over
+                if (this.gameLife <= 0) {
+                    // game over
+                    this.isEnd = true;
                     console.log('game over');
                 }
 
@@ -208,7 +209,7 @@ const gamePlay = {
         });
 
         // countdown
-        setInterval(() => {
+        this.countdownLoop = setInterval(() => {
             this.gameTime--;
             this.txtTime.setText(getDecXX(this.gameTime, 2));
             if (this.gameTime === tweenMapChangeTime1) {
@@ -219,9 +220,28 @@ const gamePlay = {
                 this.tweenMap2FadeOut.play();
                 this.tweenMap3FadeIn.play();
             }
+            
+            // check time
+            if (this.gameTime === 0) {
+                // game success
+                this.isEnd = true;
+                clearInterval(this.countdownLoop);
+            }
         }, 1000);
+
+        // start this game
+        this.isEnd = false;
     },
     update: function(){
+        // check status
+        if (this.isEnd) {
+            for (let i = 0; i<this.objs.length; i++) {
+                this.objs[i].sprite.setVelocityX(0);
+            }
+            this.player.setVelocity(0);
+            return;
+        }
+
         // background & footer movement
         this.map1Rock.tilePositionX += cRockMoveSpeed;
         this.map2Rock.tilePositionX += cRockMoveSpeed;
