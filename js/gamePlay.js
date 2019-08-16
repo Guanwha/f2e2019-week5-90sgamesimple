@@ -7,11 +7,11 @@ const playerMoveDownSpeed = 300;
 const playerMoveLeftSpeed = 200;
 const playerMoveRightSpeed = 200;
 const cObjMap = [
-    { type: 'enemy',  name: 'enemy1', path: '../assets/enemy_aluminum_can.png'},
-    { type: 'enemy',  name: 'enemy2', path: '../assets/enemy_bag.png'},
-    { type: 'enemy',  name: 'enemy3', path: '../assets/enemy_baote.png'},
-    { type: 'enemy',  name: 'enemy4', path: '../assets/enemy_fishing_net.png'},
-    { type: 'healer', name: 'healer', path: '../assets/heal_jellyfish.png'},
+    { type: 'enemy',  collider: {w: 41,  h: 43},  name: 'enemy1', path: '../assets/enemy_aluminum_can.png'},
+    { type: 'enemy',  collider: {w: 91,  h: 91},  name: 'enemy2', path: '../assets/enemy_bag.png'},
+    { type: 'enemy',  collider: {w: 76,  h: 37},  name: 'enemy3', path: '../assets/enemy_baote.png'},
+    { type: 'enemy',  collider: {w: 103, h: 155}, name: 'enemy4', path: '../assets/enemy_fishing_net.png'},
+    { type: 'healer', collider: {w: 55,  h: 72},  name: 'healer', path: '../assets/heal_jellyfish.png'},
 ];
 const cTotalGameTime = 90;                                  // total game time
 const cJellyTime = 60;                                      // time for jellyfish appealing
@@ -336,8 +336,10 @@ const generateEnemyHealer = (self) => {
     while (curX < cObjMaxX) {
         // random object
         objIdx = (curX >= cJellyStartX) ? random(4, 0) : random(3, 0);
-        let sprite = self.physics.add.sprite(curX, curY, cObjMap[objIdx].name)
-        sprite.name = cObjMap[objIdx].type;
+        const objData = cObjMap[objIdx];
+        let sprite = self.physics.add.sprite(curX, curY, objData.name)
+        sprite.setSize(objData.collider.w, objData.collider.h);
+        sprite.name = objData.type;
         sprite.objIdx = i;
         let obj = { sprite, collider: null };
         self.objs.push(obj);
