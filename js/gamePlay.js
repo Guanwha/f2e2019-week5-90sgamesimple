@@ -69,6 +69,7 @@ const gamePlay = {
         this.down_y = -1;
         this.mouseDown = false;
         this.objs = [];             // {} include sprite, collider
+        this.isPause = false;
     },
     create: function(){
         // background & footer
@@ -115,7 +116,8 @@ const gamePlay = {
         this.add.image(1231, 33, 'icon_time_bubble').setOrigin(0);
         this.btnHint = this.add.image(1166, 49, 'btn_hint').setOrigin(0).setInteractive();
         this.btnHint.on('pointerup', () => {
-            this.dialogHint.visible = true;
+            this.dialogHint.visible = true;     // show hint
+            this.isPause = true;                // pause
         });
         this.txtLife = this.add.text(185, 56, this.gameLife, { color: '#707070', fontSize: '40px', fontStyle: 'bold', fontFamily: 'Roboto'});
         this.txtTime = this.add.text(1250, 55, getDecXX(this.gameTime, 2), { color: '#FFFFFF', fontSize: '40px', fontStyle: 'bold', fontFamily: 'Roboto'});
@@ -172,7 +174,8 @@ const gamePlay = {
         this.bgHint = this.add.image(0, 0, 'bgHint').setOrigin(0);
         this.btnClose = this.add.image(816.5, 30.5, 'cross').setOrigin(0).setInteractive();
         this.btnClose.on('pointerup', () => {
-            this.dialogHint.visible = false;
+            this.dialogHint.visible = false;    // close hint
+            this.isPause = false;               // going on
         });
         this.dialogHint = this.add.container(437, 54, [this.bgHint, this.btnClose]);
         this.dialogHint.visible = false;
@@ -260,7 +263,7 @@ const gamePlay = {
     },
     update: function(){
         // check status
-        if (this.isEnd) {
+        if (this.isEnd || this.isPause) {
             for (let i = 0; i<this.objs.length; i++) {
                 this.objs[i].sprite.setVelocityX(0);
             }
