@@ -30,9 +30,15 @@ const gamePlay = {
         // player
         this.turtle = this.load.spritesheet('turtle', '../assets/turtlemove.png', { frameWidth: 400, frameHeight: 400});
 
+        // control
+        this.load.image('icon_mouse_drag', '../assets/icon_mousedown.png');
+
         // data
         this.gameLife = 3;
         this.gameTime = 90;
+        this.down_x = -1;
+        this.down_y = -1;
+        this.mouseDown = false;
     },
     create: function(){
         // background & footer
@@ -116,6 +122,42 @@ const gamePlay = {
         this.dialogHint.visible = false;
 
         // control
+        this.down_center = this.add.image(0, 0, 'icon_mouse_drag').setAlpha(0.5).setVisible(false);
+        this.down_dir = this.add.line(0, 0, 0, 0, 100, 100, '0xffffff', 0.5).setOrigin(0).setVisible(false);
+        this.input.on('pointerdown', (p) => {
+            this.down_x = p.x;
+            this.down_y = p.y;
+            this.mouseDown = true;
+            this.down_center.x = this.down_x;
+            this.down_center.y = this.down_y;
+            this.down_center.visible = true;
+            this.down_dir.visible = true;
+        });
+        this.input.on('pointermove', (p) => {
+            if (!this.mouseDown) return;
+            let cur_x = p.x;
+            let cur_y = p.y;
+            this.down_dir.setTo(this.down_x, this.down_y, cur_x, cur_y);
+            this.player.setVelocity(0);                                // clear x-direction velocity
+            if (cur_y - this.down_y < -25) {
+                this.player.setVelocityY(-playerMoveUpSpeed);
+            }
+            else if (cur_y - this.down_y > 25) {
+                this.player.setVelocityY(playerMoveDownSpeed);
+            }
+            if (cur_x - this.down_x < -25) {
+                this.player.setVelocityX(-playerMoveLeftSpeed);
+            }
+            else if (cur_x - this.down_x > 25) {
+                this.player.setVelocityX(playerMoveRightSpeed);
+            }
+        });
+        this.input.on('pointerup', () => {
+            this.down_x = this.down_y = -1;
+            this.mouseDown = false;
+            this.down_center.visible = false;
+            this.down_dir.visible = false;
+        });
 
         // countdown
         setInterval(() => {
