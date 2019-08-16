@@ -6,6 +6,25 @@ const playerMoveUpSpeed = 300;
 const playerMoveDownSpeed = 300;
 const playerMoveLeftSpeed = 200;
 const playerMoveRightSpeed = 200;
+const cObjMap = [
+    { type: 'enemy',  name: 'enemy1', path: '../assets/enemy_aluminum_can.png'},
+    { type: 'enemy',  name: 'enemy2', path: '../assets/enemy_bag.png'},
+    { type: 'enemy',  name: 'enemy3', path: '../assets/enemy_baote.png'},
+    { type: 'enemy',  name: 'enemy4', path: '../assets/enemy_fishing_net.png'},
+    { type: 'healer', name: 'healer', path: '../assets/heal_jellyfish.png'},
+];
+const cTotalGameTime = 90;                                  // total game time
+const cJellyTime = 60;                                      // time for jellyfish appealing
+const cFPS = 60;
+const cRockMoveSpeed = 8;                                   // pixels each frame (60 frames per second)
+const cJellyStartX = cRockMoveSpeed * cFPS * cJellyTime;    // position for jellyfish appealing
+const cObjMaxX = cRockMoveSpeed * cFPS * cTotalGameTime;    // obj limit range
+const cObjMinX = cw / 2;
+const cObjMaxY = ch - 233;
+const cObjMinY = 103;
+const cMaxDistBetweenObjs = cw;                             // distance range between previous and next object
+const cMinDistBetweenObjs = 100;
+
 
 const gamePlay = {
     key: 'gamePlay',
@@ -27,6 +46,11 @@ const gamePlay = {
         this.load.image('bgHint', '../assets/hint.png');
         this.load.image('cross', '../assets/button_close.png');
 
+        // enemy & healer
+        for (let i = 0; i < cObjMap.length; i++) {
+            this.load.image(cObjMap[i].name, cObjMap[i].path);
+        }
+
         // player
         this.turtle = this.load.spritesheet('turtle', '../assets/turtlemove.png', { frameWidth: 400, frameHeight: 400});
 
@@ -39,6 +63,7 @@ const gamePlay = {
         this.down_x = -1;
         this.down_y = -1;
         this.mouseDown = false;
+        this.objs = [];             // {} include sprite, collider
     },
     create: function(){
         // background & footer
@@ -90,14 +115,27 @@ const gamePlay = {
         this.add.text(185, 56, this.gameLife, { color: '#707070', fontSize: '40px', fontStyle: 'bold', fontFamily: 'Roboto'});
         this.txtTime = this.add.text(1250, 55, getDecXX(this.gameTime, 2), { color: '#FFFFFF', fontSize: '40px', fontStyle: 'bold', fontFamily: 'Roboto'});
 
+        // enemy & healer generator
+        generateEnemyHealer(this);
+
         // player
         this.player = this.physics.add.sprite(cw/2, ch/2, 'turtle').setOrigin(295/400, 180/400);    // set the anchor to the turtle's head
+        this.player.name = 'player';
         keyFrame(this);
         this.player.anims.play('swim', true);
 
         // physics
         this.player.setCollideWorldBounds(true);                    // limite the player action range
         this.player.setCircle(30, 265, 150);                        // player's collider
+
+        //-- enemy & healer
+        for (let i=0; i<this.objs.length; i++) {
+            this.objs[i].collider = this.physics.add.collider(this.player, this.objs[i].sprite, (obj1, obj2) => {
+                // when player collide with object, destory the object
+                this.objs[obj2.objIdx].collider.destroy();
+                this.objs[obj2.objIdx].sprite.visible = false;
+            });
+        }
 
         //-- upper bound
         this.upperBound = this.add.tileSprite(0, 0, cw, 103, 'map3_rock').setOrigin(0, 0).setVisible(false);
@@ -175,9 +213,14 @@ const gamePlay = {
     },
     update: function(){
         // background & footer movement
-        this.map1Rock.tilePositionX += 8;
-        this.map2Rock.tilePositionX += 8;
-        this.map3Rock.tilePositionX += 8;
+        this.map1Rock.tilePositionX += cRockMoveSpeed;
+        this.map2Rock.tilePositionX += cRockMoveSpeed;
+        this.map3Rock.tilePositionX += cRockMoveSpeed;
+
+        // enemy & healer movement
+        for (let i = 0; i<this.objs.length; i++) {
+            this.objs[i].sprite.setVelocityX(-cRockMoveSpeed * cFPS);
+        }
 
         // control
         let keyboard = this.input.keyboard.createCursorKeys();
@@ -198,6 +241,35 @@ const gamePlay = {
 }
 
 //====== functions ======
+// format number with <length> decimal digits
 const getDecXX = (num, length) => {
     return (Array(length).join('0') + num).slice(-length);
+}
+
+// generate the enemy & healer array
+const generateEnemyHealer = (self) => {
+    let curX = cObjMinX;
+    let curY = random(cObjMaxY, cObjMinY);
+    let objIdx = 0;
+    let i = 0;
+    while (curX < cObjMaxX) {
+        // random object
+        objIdx = (curX >= cJellyStartX) ? random(4, 0) : random(3, 0);
+        let sprite = self.physics.add.sprite(curX, curY, cObjMap[objIdx].name)
+        sprite.name = cObjMap[objIdx].type;
+        sprite.objIdx = i;
+        let obj = { sprite, collider: null };
+        self.objs.push(obj);
+
+        // next position
+        i++;
+        curX += random(cMaxDistBetweenObjs, cMinDistBetweenObjs);
+        curY = random(cObjMaxY, cObjMinY);
+    }
+    console.log(self.objs);
+}
+
+// random number from min to max
+const random = (max, min) => {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
