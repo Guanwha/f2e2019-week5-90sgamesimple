@@ -212,12 +212,14 @@ const gamePlay = {
         });
         this.input.on('pointermove', (p) => {
             if (!this.mouseDown) return;
+            let isSpeed = false;
             let cur_x = p.x;
             let cur_y = p.y;
             this.down_dir.setTo(this.down_x, this.down_y, cur_x, cur_y);
             this.player.setVelocity(0);                                // clear x-direction velocity
             if (cur_y - this.down_y < -25) {
                 this.player.setVelocityY(-playerMoveUpSpeed);
+                isSpeed = true;
             }
             else if (cur_y - this.down_y > 25) {
                 this.player.setVelocityY(playerMoveDownSpeed);
@@ -227,6 +229,14 @@ const gamePlay = {
             }
             else if (cur_x - this.down_x > 25) {
                 this.player.setVelocityX(playerMoveRightSpeed);
+                isSpeed = true;
+            }
+            console.log(isSpeed);
+            if (isSpeed) {
+                this.player.anims.play('speed', true);
+            }
+            else {
+                this.player.anims.play('swim', true);
             }
         });
         this.input.on('pointerup', () => {
@@ -282,19 +292,30 @@ const gamePlay = {
         }
 
         // control
-        let keyboard = this.input.keyboard.createCursorKeys();
-        this.player.setVelocity(0);                                // clear x-direction velocity
-        if (keyboard.up.isDown) {
-            this.player.setVelocityY(-playerMoveUpSpeed);
-        }
-        else if (keyboard.down.isDown) {
-            this.player.setVelocityY(playerMoveDownSpeed);
-        }
-        if (keyboard.left.isDown) {
-            this.player.setVelocityX(-playerMoveLeftSpeed);
-        }
-        else if (keyboard.right.isDown) {
-            this.player.setVelocityX(playerMoveRightSpeed);
+        if (!this.mouseDown) {
+            let isSpeed = false;
+            let keyboard = this.input.keyboard.createCursorKeys();
+            this.player.setVelocity(0);                                // clear x-direction velocity
+            if (keyboard.up.isDown) {
+                this.player.setVelocityY(-playerMoveUpSpeed);
+                isSpeed = true;
+            }
+            else if (keyboard.down.isDown) {
+                this.player.setVelocityY(playerMoveDownSpeed);
+            }
+            if (keyboard.left.isDown) {
+                this.player.setVelocityX(-playerMoveLeftSpeed);
+            }
+            else if (keyboard.right.isDown) {
+                this.player.setVelocityX(playerMoveRightSpeed);
+                isSpeed = true;
+            }
+            if (isSpeed) {
+                this.player.anims.play('speed', true);
+            }
+            else {
+                this.player.anims.play('swim', true);
+            }
         }
     },
 }
