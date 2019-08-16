@@ -19,7 +19,7 @@ const cFPS = 60;
 const cRockMoveSpeed = 8;                                   // pixels each frame (60 frames per second)
 const cJellyStartX = cRockMoveSpeed * cFPS * cJellyTime;    // position for jellyfish appealing
 const cObjMaxX = cRockMoveSpeed * cFPS * cTotalGameTime;    // obj limit range
-const cObjMinX = cw / 2;
+const cObjMinX = cw;
 const cObjMaxY = ch - 233;
 const cObjMinY = 103;
 const cMaxDistBetweenObjs = cw;                             // distance range between previous and next object
@@ -112,7 +112,7 @@ const gamePlay = {
         this.btnHint.on('pointerup', () => {
             this.dialogHint.visible = true;
         });
-        this.add.text(185, 56, this.gameLife, { color: '#707070', fontSize: '40px', fontStyle: 'bold', fontFamily: 'Roboto'});
+        this.txtLife = this.add.text(185, 56, this.gameLife, { color: '#707070', fontSize: '40px', fontStyle: 'bold', fontFamily: 'Roboto'});
         this.txtTime = this.add.text(1250, 55, getDecXX(this.gameTime, 2), { color: '#FFFFFF', fontSize: '40px', fontStyle: 'bold', fontFamily: 'Roboto'});
 
         // enemy & healer generator
@@ -131,6 +131,16 @@ const gamePlay = {
         //-- enemy & healer
         for (let i=0; i<this.objs.length; i++) {
             this.objs[i].collider = this.physics.add.collider(this.player, this.objs[i].sprite, (obj1, obj2) => {
+                // life +/-
+                this.gameLife = (obj2.name === 'enemy') ? this.gameLife - 1
+                             : ((obj2.name === 'healer') ? this.gameLife + 1 : this.gameLife);
+                this.gameLife = (this.gameLife > 5) ? 5 : this.gameLife;                            // max-life is 5
+                this.txtLife.setText(this.gameLife);
+                if (this.gameLife < 0) {
+                    // [TODO] game over
+                    console.log('game over');
+                }
+
                 // when player collide with object, destory the object
                 this.objs[obj2.objIdx].collider.destroy();
                 this.objs[obj2.objIdx].sprite.visible = false;
