@@ -17,7 +17,7 @@ const tweenMapChangeTime1 = cTotalTime - cLevelTime[0];                         
 const tweenMapChangeTime2 = cTotalTime - cLevelTime[0] - cLevelTime[1];         // time from map2 to map3
 const cFPS = 60;                                                                // frames per second
 const cRockMoveSpeed = 8;                                                       // pixels each frame (60 frames per second) for footer
-const cObjMoveSpeed = [8, 8, 12];                                               // pixels each frame (60 frames per second) for enemy/healer
+const cObjMoveSpeed = [8, 10, 13];                                              // pixels each frame (60 frames per second) for enemy/healer
 const cLevelStartX = [
     0,
     (cObjMoveSpeed[0] * cLevelTime[0]) * cFPS,
@@ -30,7 +30,7 @@ const cObjMaxX = (cObjMoveSpeed[0] * cLevelTime[0] +                            
 const cObjMinX = cw;
 const cObjMaxY = ch - 233;
 const cObjMinY = 103;
-const cMaxDistBetweenObjs = [cw, cw/2, cw/2];               // distance range between previous and next object (level: 0, 1, 2)
+const cMaxDistBetweenObjs = [cw, cw/2, cw/3];                                   // distance range between previous and next object (level: 0, 1, 2)
 const cMinDistBetweenObjs = [100, 100, 100];
 
 
