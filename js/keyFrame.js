@@ -1,5 +1,4 @@
 const keyFrame = (self) => {
-  console.log(self.anims);
   self.anims.create({
     key: 'swim',
     frames: self.anims.generateFrameNumbers('turtle', { start: 0, end: 1 }),

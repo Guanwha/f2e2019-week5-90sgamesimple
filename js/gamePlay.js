@@ -1,7 +1,5 @@
 const tweenMapEase = 'Power4';
 const tweenMapDuration = 2000;
-const tweenMapChangeTime1 = 60;     // [!!!]
-const tweenMapChangeTime2 = 30;     // [!!!]
 const playerMoveUpSpeed = 300;
 const playerMoveDownSpeed = 300;
 const playerMoveLeftSpeed = 200;
@@ -15,6 +13,8 @@ const cObjMap = [
 ];
 const cLevelTime = [30, 30, 30];                                                // duration each level
 const cTotalTime = cLevelTime[0] + cLevelTime[1] + cLevelTime[2];
+const tweenMapChangeTime1 = cTotalTime - cLevelTime[0];                         // time from map1 to map2
+const tweenMapChangeTime2 = cTotalTime - cLevelTime[0] - cLevelTime[1];         // time from map2 to map3
 const cFPS = 60;                                                                // frames per second
 const cRockMoveSpeed = 8;                                                       // pixels each frame (60 frames per second) for footer
 const cObjMoveSpeed = [8, 8, 12];                                               // pixels each frame (60 frames per second) for enemy/healer
@@ -72,7 +72,7 @@ const gamePlay = {
 
         // data
         this.gameLife = 3;
-        this.gameTime = 90;
+        this.gameTime = cTotalTime;
         this.down_x = -1;
         this.down_y = -1;
         this.mouseDown = false;
@@ -250,7 +250,6 @@ const gamePlay = {
                 this.player.setVelocityX(playerMoveRightSpeed);
                 isSpeed = true;
             }
-            console.log(isSpeed);
             if (isSpeed) {
                 this.player.anims.play('speed', true);
             }
@@ -285,6 +284,7 @@ const gamePlay = {
                 this.isEndAnim = true;
                 this.player.setCollideWorldBounds(false);
                 clearInterval(this.countdownLoop);
+                console.log('game success');
             }
         }, 1000);
 
