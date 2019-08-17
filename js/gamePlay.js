@@ -1,29 +1,37 @@
 const tweenMapEase = 'Power4';
 const tweenMapDuration = 2000;
-const tweenMapChangeTime1 = 60;     // [!!!]
-const tweenMapChangeTime2 = 30;     // [!!!]
 const playerMoveUpSpeed = 300;
 const playerMoveDownSpeed = 300;
 const playerMoveLeftSpeed = 200;
 const playerMoveRightSpeed = 200;
 const cObjMap = [
-    { type: 'enemy',  name: 'enemy1', path: '../assets/enemy_aluminum_can.png'},
-    { type: 'enemy',  name: 'enemy2', path: '../assets/enemy_bag.png'},
-    { type: 'enemy',  name: 'enemy3', path: '../assets/enemy_baote.png'},
-    { type: 'enemy',  name: 'enemy4', path: '../assets/enemy_fishing_net.png'},
-    { type: 'healer', name: 'healer', path: '../assets/heal_jellyfish.png'},
+    { category: 'enemy',  collider: {w: 41,  h: 43},  key: 'enemy1', path: '../assets/enemy_aluminum_can.png'},
+    { category: 'enemy',  collider: {w: 91,  h: 91},  key: 'enemy2', path: '../assets/enemy_bag.png'},
+    { category: 'enemy',  collider: {w: 76,  h: 37},  key: 'enemy3', path: '../assets/enemy_baote.png'},
+    { category: 'enemy',  collider: {w: 103, h: 155}, key: 'enemy4', path: '../assets/enemy_fishing_net.png'},
+    { category: 'healer', collider: {w: 55,  h: 72},  key: 'healer', path: '../assets/heal_jellyfish.png'},
 ];
-const cTotalGameTime = 90;                                  // total game time
-const cJellyTime = 60;                                      // time for jellyfish appealing
-const cFPS = 60;
-const cRockMoveSpeed = 8;                                   // pixels each frame (60 frames per second)
-const cJellyStartX = cRockMoveSpeed * cFPS * cJellyTime;    // position for jellyfish appealing
-const cObjMaxX = cRockMoveSpeed * cFPS * cTotalGameTime;    // obj limit range
+const cLevelTime = [30, 30, 30];                                                // duration each level
+const cTotalTime = cLevelTime[0] + cLevelTime[1] + cLevelTime[2];
+const tweenMapChangeTime1 = cTotalTime - cLevelTime[0];                         // time from map1 to map2
+const tweenMapChangeTime2 = cTotalTime - cLevelTime[0] - cLevelTime[1];         // time from map2 to map3
+const cFPS = 60;                                                                // frames per second
+const cRockMoveSpeed = 8;                                                       // pixels each frame (60 frames per second) for footer
+const cObjMoveSpeed = [8, 10, 13];                                              // pixels each frame (60 frames per second) for enemy/healer
+const cLevelStartX = [
+    0,
+    (cObjMoveSpeed[0] * cLevelTime[0]) * cFPS,
+    (cObjMoveSpeed[0] * cLevelTime[0] + cObjMoveSpeed[1] * cLevelTime[1]) * cFPS,
+]
+const cJellyStartX = cLevelStartX[2]                                            // position for jellyfish appealing
+const cObjMaxX = (cObjMoveSpeed[0] * cLevelTime[0] +                            // obj limit range
+                  cObjMoveSpeed[1] * cLevelTime[1] +
+                  cObjMoveSpeed[2] * cLevelTime[2]) * cFPS;
 const cObjMinX = cw;
 const cObjMaxY = ch - 233;
 const cObjMinY = 103;
-const cMaxDistBetweenObjs = cw;                             // distance range between previous and next object
-const cMinDistBetweenObjs = 100;
+const cMaxDistBetweenObjs = [cw, cw/2, cw/3];                                   // distance range between previous and next object (level: 0, 1, 2)
+const cMinDistBetweenObjs = [100, 100, 100];
 
 
 const gamePlay = {
@@ -53,7 +61,7 @@ const gamePlay = {
 
         // enemy & healer
         for (let i = 0; i < cObjMap.length; i++) {
-            this.load.image(cObjMap[i].name, cObjMap[i].path);
+            this.load.image(cObjMap[i].key, cObjMap[i].path);
         }
 
         // player
@@ -64,11 +72,13 @@ const gamePlay = {
 
         // data
         this.gameLife = 3;
-        this.gameTime = 90;
+        this.gameTime = cTotalTime;
         this.down_x = -1;
         this.down_y = -1;
         this.mouseDown = false;
         this.objs = [];             // {} include sprite, collider
+        this.isPause = false;
+        this.isHurt = false;
     },
     create: function(){
         // background & footer
@@ -115,7 +125,8 @@ const gamePlay = {
         this.add.image(1231, 33, 'icon_time_bubble').setOrigin(0);
         this.btnHint = this.add.image(1166, 49, 'btn_hint').setOrigin(0).setInteractive();
         this.btnHint.on('pointerup', () => {
-            this.dialogHint.visible = true;
+            this.dialogHint.visible = true;     // show hint
+            this.isPause = true;                // pause
         });
         this.txtLife = this.add.text(185, 56, this.gameLife, { color: '#707070', fontSize: '40px', fontStyle: 'bold', fontFamily: 'Roboto'});
         this.txtTime = this.add.text(1250, 55, getDecXX(this.gameTime, 2), { color: '#FFFFFF', fontSize: '40px', fontStyle: 'bold', fontFamily: 'Roboto'});
@@ -125,7 +136,7 @@ const gamePlay = {
 
         // player
         this.player = this.physics.add.sprite(cw/2, ch/2, 'turtle').setOrigin(295/400, 180/400);    // set the anchor to the turtle's head
-        this.player.name = 'player';
+        this.player.category = 'player';
         keyFrame(this);
         this.player.anims.play('swim', true);
 
@@ -136,17 +147,26 @@ const gamePlay = {
         //-- enemy & healer
         for (let i=0; i<this.objs.length; i++) {
             this.objs[i].collider = this.physics.add.collider(this.player, this.objs[i].sprite, (obj1, obj2) => {
-                // life +/-
-                this.gameLife = (obj2.name === 'enemy') ? this.gameLife - 1
-                             : ((obj2.name === 'healer') ? this.gameLife + 1 : this.gameLife);
+                // player collide with enemy or healer
+                this.gameLife = (obj2.category === 'enemy') ? this.gameLife - 1
+                             : ((obj2.category === 'healer') ? this.gameLife + 1 : this.gameLife);
                 this.gameLife = (this.gameLife > 5) ? 5 : this.gameLife;                            // max-life is 5
                 this.txtLife.setText(this.gameLife);
-                if (this.gameLife <= 0) {
-                    // game over
-                    this.isEnd = true;
-                    this.dialogGameOver.visible = true;
-                    clearInterval(this.countdownLoop);
-                    console.log('game over');
+                if (obj2.category === 'enemy') {
+                    if (this.gameLife <= 0) {
+                        // game over
+                        this.player.anims.play('dead', true);   // play dead animation
+                        this.isEnd = true;
+                        this.dialogGameOver.visible = true;
+                        clearInterval(this.countdownLoop);
+                        console.log('game over');
+                    }
+                    else {
+                        this.player.anims.play('hurt', true);   // play hurt animation
+                        this.player.anims.nextAnim = 'swim';
+                        this.isHurt = true;
+                        setTimeout(() => { this.isHurt = false; }, cHurtDuration);
+                    }
                 }
 
                 // when player collide with object, destory the object
@@ -172,7 +192,8 @@ const gamePlay = {
         this.bgHint = this.add.image(0, 0, 'bgHint').setOrigin(0);
         this.btnClose = this.add.image(816.5, 30.5, 'cross').setOrigin(0).setInteractive();
         this.btnClose.on('pointerup', () => {
-            this.dialogHint.visible = false;
+            this.dialogHint.visible = false;    // close hint
+            this.isPause = false;               // going on
         });
         this.dialogHint = this.add.container(437, 54, [this.bgHint, this.btnClose]);
         this.dialogHint.visible = false;
@@ -199,6 +220,7 @@ const gamePlay = {
         this.down_center = this.add.image(0, 0, 'icon_mouse_drag').setAlpha(0.5).setVisible(false);
         this.down_dir = this.add.line(0, 0, 0, 0, 100, 100, '0xffffff', 0.5).setOrigin(0).setVisible(false);
         this.input.on('pointerdown', (p) => {
+            if (this.isEnd || this.isEndAnim) return;
             this.down_x = p.x;
             this.down_y = p.y;
             this.mouseDown = true;
@@ -209,12 +231,14 @@ const gamePlay = {
         });
         this.input.on('pointermove', (p) => {
             if (!this.mouseDown) return;
+            let isSpeed = false;
             let cur_x = p.x;
             let cur_y = p.y;
             this.down_dir.setTo(this.down_x, this.down_y, cur_x, cur_y);
             this.player.setVelocity(0);                                // clear x-direction velocity
             if (cur_y - this.down_y < -25) {
                 this.player.setVelocityY(-playerMoveUpSpeed);
+                isSpeed = true;
             }
             else if (cur_y - this.down_y > 25) {
                 this.player.setVelocityY(playerMoveDownSpeed);
@@ -224,6 +248,13 @@ const gamePlay = {
             }
             else if (cur_x - this.down_x > 25) {
                 this.player.setVelocityX(playerMoveRightSpeed);
+                isSpeed = true;
+            }
+            if (isSpeed) {
+                this.player.anims.play('speed', true);
+            }
+            else {
+                this.player.anims.play('swim', true);
             }
         });
         this.input.on('pointerup', () => {
@@ -235,6 +266,7 @@ const gamePlay = {
 
         // countdown
         this.countdownLoop = setInterval(() => {
+            if (this.isPause) return;
             this.gameTime--;
             this.txtTime.setText(getDecXX(this.gameTime, 2));
             if (this.gameTime === tweenMapChangeTime1) {
@@ -249,18 +281,30 @@ const gamePlay = {
             // check time
             if (this.gameTime === 0) {
                 // game success
-                this.isEnd = true;
-                this.dialogGameSuccess.visible = true;
+                this.isEndAnim = true;
+                this.player.setCollideWorldBounds(false);
                 clearInterval(this.countdownLoop);
+                console.log('game success');
             }
         }, 1000);
 
         // start this game
         this.isEnd = false;
+        this.isEndAnim = false;
     },
     update: function(){
         // check status
-        if (this.isEnd) {
+        if (this.isEndAnim) {
+            this.player.setVelocityX(playerMoveRightSpeed);
+            if (this.player.x >= cw + 400) {    // screen width + player image width
+                // end animation finished
+                this.isEnd = true;
+                this.isEndAnim = false;
+                this.dialogGameSuccess.visible = true;
+            }
+            return;
+        }
+        if (this.isEnd || this.isPause) {
             for (let i = 0; i<this.objs.length; i++) {
                 this.objs[i].sprite.setVelocityX(0);
             }
@@ -274,24 +318,40 @@ const gamePlay = {
         this.map3Rock.tilePositionX += cRockMoveSpeed;
 
         // enemy & healer movement
+        const lv = (cTotalTime - this.gameTime < cLevelTime[0]) ? 0 :
+                   (cTotalTime - this.gameTime < (cLevelTime[0] + cLevelTime[1]) ? 1 : 2);
         for (let i = 0; i<this.objs.length; i++) {
-            this.objs[i].sprite.setVelocityX(-cRockMoveSpeed * cFPS);
+            this.objs[i].sprite.setVelocityX(-cObjMoveSpeed[lv] * cFPS);
         }
 
         // control
-        let keyboard = this.input.keyboard.createCursorKeys();
-        this.player.setVelocity(0);                                // clear x-direction velocity
-        if (keyboard.up.isDown) {
-            this.player.setVelocityY(-playerMoveUpSpeed);
-        }
-        else if (keyboard.down.isDown) {
-            this.player.setVelocityY(playerMoveDownSpeed);
-        }
-        if (keyboard.left.isDown) {
-            this.player.setVelocityX(-playerMoveLeftSpeed);
-        }
-        else if (keyboard.right.isDown) {
-            this.player.setVelocityX(playerMoveRightSpeed);
+        if (!this.mouseDown) {
+            let isSpeed = false;
+            let keyboard = this.input.keyboard.createCursorKeys();
+            this.player.setVelocity(0);                                // clear x-direction velocity
+            if (keyboard.up.isDown) {
+                this.player.setVelocityY(-playerMoveUpSpeed);
+                isSpeed = true;
+            }
+            else if (keyboard.down.isDown) {
+                this.player.setVelocityY(playerMoveDownSpeed);
+            }
+            if (keyboard.left.isDown) {
+                this.player.setVelocityX(-playerMoveLeftSpeed);
+            }
+            else if (keyboard.right.isDown) {
+                this.player.setVelocityX(playerMoveRightSpeed);
+                isSpeed = true;
+            }
+            // change the animation when hurt animation isn't doing
+            if (!this.isHurt) {
+                if (isSpeed) {
+                    this.player.anims.play('speed', true);
+                }
+                else {
+                    this.player.anims.play('swim', true);
+                }
+            }
         }
     },
 }
@@ -309,20 +369,25 @@ const generateEnemyHealer = (self) => {
     let objIdx = 0;
     let i = 0;
     while (curX < cObjMaxX) {
+        // check level
+        const lv = (curX >= cLevelStartX[2]) ? 2 :
+                   (curX >= cLevelStartX[1]) ? 1 : 0;
+
         // random object
         objIdx = (curX >= cJellyStartX) ? random(4, 0) : random(3, 0);
-        let sprite = self.physics.add.sprite(curX, curY, cObjMap[objIdx].name)
-        sprite.name = cObjMap[objIdx].type;
-        sprite.objIdx = i;
+        const objData = cObjMap[objIdx];
+        let sprite = self.physics.add.sprite(curX, curY, objData.key);      // create sprite object
+        sprite.setSize(objData.collider.w, objData.collider.h);             // set collider
+        sprite.category = objData.category;                                 // set the category
+        sprite.objIdx = i;                                                  // which object in cObjMap[]
         let obj = { sprite, collider: null };
         self.objs.push(obj);
 
         // next position
         i++;
-        curX += random(cMaxDistBetweenObjs, cMinDistBetweenObjs);
+        curX += random(cMaxDistBetweenObjs[lv], cMinDistBetweenObjs[lv]);
         curY = random(cObjMaxY, cObjMinY);
     }
-    console.log(self.objs);
 }
 
 // random number from min to max
