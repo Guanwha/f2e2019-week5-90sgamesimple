@@ -220,6 +220,7 @@ const gamePlay = {
         this.down_center = this.add.image(0, 0, 'icon_mouse_drag').setAlpha(0.5).setVisible(false);
         this.down_dir = this.add.line(0, 0, 0, 0, 100, 100, '0xffffff', 0.5).setOrigin(0).setVisible(false);
         this.input.on('pointerdown', (p) => {
+            if (this.isEnd || this.isEndAnim) return;
             this.down_x = p.x;
             this.down_y = p.y;
             this.mouseDown = true;
@@ -281,17 +282,28 @@ const gamePlay = {
             // check time
             if (this.gameTime === 0) {
                 // game success
-                this.isEnd = true;
-                this.dialogGameSuccess.visible = true;
+                this.isEndAnim = true;
+                this.player.setCollideWorldBounds(false);
                 clearInterval(this.countdownLoop);
             }
         }, 1000);
 
         // start this game
         this.isEnd = false;
+        this.isEndAnim = false;
     },
     update: function(){
         // check status
+        if (this.isEndAnim) {
+            this.player.setVelocityX(playerMoveRightSpeed);
+            if (this.player.x >= cw + 400) {    // screen width + player image width
+                // end animation finished
+                this.isEnd = true;
+                this.isEndAnim = false;
+                this.dialogGameSuccess.visible = true;
+            }
+            return;
+        }
         if (this.isEnd || this.isPause) {
             for (let i = 0; i<this.objs.length; i++) {
                 this.objs[i].sprite.setVelocityX(0);
