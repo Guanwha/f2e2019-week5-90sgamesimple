@@ -5,11 +5,11 @@ const playerMoveDownSpeed = 300;
 const playerMoveLeftSpeed = 200;
 const playerMoveRightSpeed = 200;
 const cObjMap = [
-    { category: 'enemy',  collider: {w: 41,  h: 43},  key: 'enemy1', path: '../assets/enemy_aluminum_can.png'},
-    { category: 'enemy',  collider: {w: 91,  h: 91},  key: 'enemy2', path: '../assets/enemy_bag.png'},
-    { category: 'enemy',  collider: {w: 76,  h: 37},  key: 'enemy3', path: '../assets/enemy_baote.png'},
-    { category: 'enemy',  collider: {w: 103, h: 155}, key: 'enemy4', path: '../assets/enemy_fishing_net.png'},
-    { category: 'healer', collider: {w: 55,  h: 72},  key: 'healer', path: '../assets/heal_jellyfish.png'},
+    { category: 'enemy',  collider: {w: 41,  h: 43},  key: 'enemy1', path: './assets/enemy_aluminum_can.png'},
+    { category: 'enemy',  collider: {w: 91,  h: 91},  key: 'enemy2', path: './assets/enemy_bag.png'},
+    { category: 'enemy',  collider: {w: 76,  h: 37},  key: 'enemy3', path: './assets/enemy_baote.png'},
+    { category: 'enemy',  collider: {w: 103, h: 155}, key: 'enemy4', path: './assets/enemy_fishing_net.png'},
+    { category: 'healer', collider: {w: 55,  h: 72},  key: 'healer', path: './assets/heal_jellyfish.png'},
 ];
 const cLevelTime = [30, 30, 30];                                                // duration each level
 const cTotalTime = cLevelTime[0] + cLevelTime[1] + cLevelTime[2];
@@ -38,26 +38,26 @@ const gamePlay = {
     key: 'gamePlay',
     preload: function(){
         // background & footer
-        this.load.image('map1_bg',   '../assets/map1_bg.png');
-        this.load.image('map2_bg',   '../assets/map2_bg.png');
-        this.load.image('map3_bg',   '../assets/map3_bg.png');
-        this.load.image('map1_rock', '../assets/map1_rock.png');
-        this.load.image('map2_rock', '../assets/map2_rock.png');
-        this.load.image('map3_rock', '../assets/map3_rock.png');
+        this.load.image('map1_bg',   './assets/map1_bg.png');
+        this.load.image('map2_bg',   './assets/map2_bg.png');
+        this.load.image('map3_bg',   './assets/map3_bg.png');
+        this.load.image('map1_rock', './assets/map1_rock.png');
+        this.load.image('map2_rock', './assets/map2_rock.png');
+        this.load.image('map3_rock', './assets/map3_rock.png');
 
         // status
-        this.load.image('icon_turtle_life', '../assets/icon_turtlelife.png');
-        this.load.image('icon_time_bubble', '../assets/icon_timebubble.png');
-        this.load.image('btn_hint', '../assets/button_hint2.png');
+        this.load.image('icon_turtle_life', './assets/icon_turtlelife.png');
+        this.load.image('icon_time_bubble', './assets/icon_timebubble.png');
+        this.load.image('btn_hint', './assets/button_hint2.png');
         
         // hint dialog
-        this.load.image('bgHint', '../assets/hint.png');
-        this.load.image('cross', '../assets/button_close.png');
+        this.load.image('bgHint', './assets/hint.png');
+        this.load.image('cross', './assets/button_close.png');
 
         // gameover dialog
-        this.load.image('bg_game_over', '../assets/gameover_1.png');
-        this.load.image('bg_game_success', '../assets/gameover_2.png');
-        this.load.image('btn_restart', '../assets/button_playagain.png');
+        this.load.image('bg_game_over', './assets/gameover_1.png');
+        this.load.image('bg_game_success', './assets/gameover_2.png');
+        this.load.image('btn_restart', './assets/button_playagain.png');
 
         // enemy & healer
         for (let i = 0; i < cObjMap.length; i++) {
@@ -65,10 +65,10 @@ const gamePlay = {
         }
 
         // player
-        this.turtle = this.load.spritesheet('turtle', '../assets/turtlemove.png', { frameWidth: 400, frameHeight: 400});
+        this.turtle = this.load.spritesheet('turtle', './assets/turtlemove.png', { frameWidth: 400, frameHeight: 400});
 
         // control
-        this.load.image('icon_mouse_drag', '../assets/icon_mousedown.png');
+        this.load.image('icon_mouse_drag', './assets/icon_mousedown.png');
 
         // data
         this.gameLife = 3;

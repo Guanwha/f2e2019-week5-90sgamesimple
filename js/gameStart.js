@@ -2,11 +2,11 @@
 const gameStart = {
     key: 'gameStart',
     preload: function(){
-        this.load.image('bg1', '../assets/gamecover.png');
-        this.load.image('btnPlay', '../assets/button_play.png');
-        this.load.image('btnHint', '../assets/button_hint.png');
-        this.load.image('bgHint', '../assets/hint.png');
-        this.load.image('btnClose', '../assets/button_close.png');
+        this.load.image('bg1', './assets/gamecover.png');
+        this.load.image('btnPlay', './assets/button_play.png');
+        this.load.image('btnHint', './assets/button_hint.png');
+        this.load.image('bgHint', './assets/hint.png');
+        this.load.image('btnClose', './assets/button_close.png');
     },
     create: function(){
         // game start screen
