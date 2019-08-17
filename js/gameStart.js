@@ -22,7 +22,6 @@ const gameStart = {
 
         // interaction
         this.btnPlay.on('pointerup', () => {
-          console.log('press the play button');
           this.scene.start('gamePlay');
         });
         this.btnHint.on('pointerup', () => {
